@@ -5,6 +5,7 @@ import Search from '../../components/Search';
 import NewProducts from '../../components/Home/NewProducts';
 import Banners from '../../components/Home/Banners';
 import colors from '../../styles/colors';
+import SearchHistory from '../../components/Search/SearchHistory';
 
 export default function Home() {
   return (

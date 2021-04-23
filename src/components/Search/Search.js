@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {StyleSheet, View, Keyboard, Animated} from 'react-native';
 import {Searchbar} from 'react-native-paper';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import {
   AnimatedIcon,
   inputAnimationWidth,
@@ -14,11 +14,13 @@ import {updateSearchHistoryApi} from '../../api/search';
 import SearchHistory from './SearchHistory';
 import colors from '../../styles/colors';
 
-export default function Search() {
-  const [searchQuery, setSearchQuery] = useState('');
+export default function Search(props) {
+  const {currentSearch} = props;
+  const [searchQuery, setSearchQuery] = useState(currentSearch || '');
   const [showHistory, setShowHistory] = useState(false);
   const [countainerHeight, setCountainerHeight] = useState(0);
   const navigation = useNavigation();
+  const route = useRoute();
 
   const openSearch = () => {
     animatedTrasnsition.start();
@@ -35,14 +37,25 @@ export default function Search() {
     setSearchQuery(query);
   };
 
-  const onSearch = async () => {
-    closeSearch();
+  const onSearch = async reuseSearch => {
+    const isReuse = typeof reuseSearch === 'string';
 
-    await updateSearchHistoryApi(searchQuery);
+    if (!searchQuery && !isReuse) {
+      closeSearch();
+    } else {
+      !isReuse && (await updateSearchHistoryApi(searchQuery));
 
-    navigation.push('search', {
-      search: searchQuery,
-    });
+      if (route.name === 'search') {
+        navigation.push('search', {
+          search: isReuse ? reuseSearch : searchQuery,
+        });
+      } else {
+        navigation.navigate('search', {
+          search: isReuse ? reuseSearch : searchQuery,
+        });
+        closeSearch();
+      }
+    }
   };
 
   return (
@@ -69,6 +82,7 @@ export default function Search() {
       <SearchHistory
         showHistory={showHistory}
         countainerHeight={countainerHeight}
+        onSearch={onSearch}
       />
     </View>
   );

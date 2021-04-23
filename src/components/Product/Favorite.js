@@ -1,24 +1,72 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {Button} from 'react-native-paper';
+import {size} from 'lodash';
+import useAuth from '../../hooks/useAuth';
+import {
+  isFavoriteApi,
+  addFavoriteApi,
+  deleteFavoriteApi,
+} from '../../api/favorite';
 
 export default function Favorite(props) {
   const {product} = props;
+  const [isFavorite, setIsFavorite] = useState(undefined);
+  const [loading, setLoading] = useState(false);
+  const {auth} = useAuth();
 
-  const addFavorite = () => {
-    console.log('PRoducto añadido a la lista de favoritos');
-    console.log(product.title);
+  useEffect(() => {
+    (async () => {
+      const response = await isFavoriteApi(auth, product._id);
+      if (size(response) === 0) setIsFavorite(false);
+      else setIsFavorite(true);
+    })();
+  }, [product]);
+
+  const addFavorite = async () => {
+    if (!loading) {
+      setLoading(true);
+      {
+        try {
+          await addFavoriteApi(auth, product._id);
+          setIsFavorite(true);
+        } catch (error) {
+          console.log(error);
+        }
+        setLoading(false);
+      }
+    }
   };
+
+  const deleteFavorite = async () => {
+    if (!loading) {
+      setLoading(true);
+      try {
+        await deleteFavoriteApi(auth, product._id);
+        setIsFavorite(false);
+      } catch (error) {
+        console.log(error);
+      }
+      setLoading(false);
+    }
+  };
+
+  if (isFavorite === undefined) return null;
 
   return (
     <View style={{zIndex: 1}}>
       <Button
         mode="contained"
-        contentStyle={styles.btnAddFavoritesConten}
+        contentStyle={
+          isFavorite
+            ? styles.btnDeleteFavoritesConten
+            : styles.btnAddFavoritesConten
+        }
         labelStyle={styles.btnLabel}
         style={styles.btn}
-        onPress={addFavorite}>
-        Añadir a favoritos
+        onPress={isFavorite ? deleteFavorite : addFavorite}
+        loading={loading}>
+        {isFavorite ? 'Eliminar de favoritos' : '  Añadir a favoritos'}
       </Button>
     </View>
   );
@@ -27,6 +75,10 @@ export default function Favorite(props) {
 const styles = StyleSheet.create({
   btnAddFavoritesConten: {
     backgroundColor: '#057b00',
+    paddingVertical: 5,
+  },
+  btnDeleteFavoritesConten: {
+    backgroundColor: '#c40000',
     paddingVertical: 5,
   },
   btnLabel: {

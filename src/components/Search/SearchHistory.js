@@ -6,13 +6,14 @@ import {
   Dimensions,
   TouchableWithoutFeedback,
 } from 'react-native';
+import {TouchableNativeFeedback} from 'react-native-gesture-handler';
 import AwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import {map} from 'lodash';
 import {getSearchHistoryApi} from '../../api/search';
 import colors from '../../styles/colors';
 
 export default function SearchHistory(props) {
-  const {showHistory, countainerHeight} = props;
+  const {showHistory, countainerHeight, onSearch} = props;
   const [history, setHistory] = useState(null);
 
   useEffect(() => {
@@ -33,14 +34,14 @@ export default function SearchHistory(props) {
       ]}>
       {history &&
         map(history, (item, index) => (
-          <TouchableWithoutFeedback
+          <TouchableNativeFeedback
             key={index}
-            onPress={() => console.log(item.search)}>
+            onPress={() => onSearch(item.search)}>
             <View style={styles.historyItem}>
               <Text style={styles.text}>{item.search}</Text>
               <AwesomeIcon name="arrow-right" size={16} />
             </View>
-          </TouchableWithoutFeedback>
+          </TouchableNativeFeedback>
         ))}
     </View>
   );

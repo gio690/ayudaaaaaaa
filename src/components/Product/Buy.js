@@ -1,14 +1,23 @@
 import React from 'react';
 import {StyleSheet, View} from 'react-native';
 import {Button} from 'react-native-paper';
+import Toast from 'react-native-root-toast';
+import {addProductCartApi} from '../../api/cart';
 
 export default function Buy(props) {
   const {product, quantity} = props;
 
-  const addProductCart = () => {
-    console.log('Producto añadido al carrito.');
-    console.log(product.title);
-    console.log('Cantidad: ' + quantity);
+  const addProductCart = async () => {
+    const response = await addProductCartApi(product._id, quantity);
+    if (response) {
+      Toast.show('Producto añadido al carrito', {
+        position: Toast.positions.CENTER,
+      });
+    } else {
+      Toast.show('Producto añadido al carrito', {
+        position: Toast.positions.CENTER,
+      });
+    }
   };
   return (
     <View style={{zIndex: 1}}>
